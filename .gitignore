@@ -20,5 +20,5 @@ venv/
 .DS_Store
 Thumbs.db
 
-# Streamlit (optional)
+# Streamlit
 .streamlit/
