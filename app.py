@@ -5,7 +5,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
-# Defaults that work even if .env has nothing extra
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1")
 OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "300"))  # seconds
 
@@ -17,13 +16,8 @@ def _ollama_ok() -> bool:
         return False
 
 def _ollama_chat(payload: dict) -> str:
-    """
-    Centralized POST with reliable timeouts and tight generation settings
-    (no env changes required).
-    """
+    
     url = OLLAMA_BASE_URL.rstrip("/") + "/api/chat"
-
-    # Fast, deterministic defaults (can be overridden inside payload if needed)
     merged = {
         **payload,
         "model": payload.get("model", OLLAMA_MODEL),
@@ -224,8 +218,7 @@ if uploaded is not None:
         key_col = st.selectbox("Choose a candidate key column", options=list(df.columns), key="dq_key")
         if st.button("Run uniqueness check", key="uniq_btn"):
             res = check_uniqueness(df, key_col)
-            icon = "✅" if res["status"] == "PASS" else "❌"
-            st.write(f"{icon} {res['check']}: **{res['status']}**")
+            st.write(f"{res['check']}: **{res['status']}**")
             st.write(res["details"])
 
     with st.expander("Null threshold"):
@@ -233,8 +226,7 @@ if uploaded is not None:
         thr = st.number_input("Max allowed null %", min_value=0.0, max_value=100.0, value=5.0, step=0.5, key="dq_null_thr")
         if st.button("Run null threshold check", key="null_btn"):
             res2 = check_null_threshold(df, cols, threshold_pct=thr)
-            icon2 = "✅" if res2["status"] == "PASS" else "❌"
-            st.write(f"{icon2} {res2['check']}: **{res2['status']}**")
+            st.write(f"{res2['check']}: **{res2['status']}**")
             st.write(res2["details"])
             if res2.get("per_column"):
                 st.dataframe(pd.DataFrame(res2["per_column"]), use_container_width=True)
@@ -249,8 +241,7 @@ if uploaded is not None:
             mult = st.number_input("Max allowed as multiple of P99", value=2.0, step=0.1, key="dq_range_mult")
             if st.button("Run value range check", key="range_btn"):
                 res3 = check_value_range(df, vr_col, min_allowed=min_allowed, max_multiplier_of_p99=mult)
-                icon3 = "✅" if res3["status"] == "PASS" else ("⚠️" if res3["status"] == "SKIP" else "❌")
-                st.write(f"{icon3} {res3['check']}: **{res3['status']}**")
+                st.write(f"{res3['check']}: **{res3['status']}**")
                 st.write(res3["details"])
 
     # =========================
